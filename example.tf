@@ -1,9 +1,9 @@
 provider "texplate" {}
 
-data "texplate_template" "test" {
+data "texplate_execute" "test" {
   template = "Hello, world!"
 }
 
 output "test" {
-  value = "${data.texplate_template.test.output}"
+  value = "${data.texplate_execute.test.output}"
 }
