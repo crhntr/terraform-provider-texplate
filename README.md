@@ -3,6 +3,7 @@
 Go templates syntax in terraform.
 Inspired by [texplate](https://github.com/pivotal-cf/texplate).
 
+*Example "director-config" yaml copied from [pivotal-cf/terraforming-azure](https://github.com/pivotal-cf/terraforming-azure).*
 
 ```hcl
 provider "texplate" {}
