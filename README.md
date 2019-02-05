@@ -46,3 +46,19 @@ output "director_config" {
   value = "${data.texplate_execute.director_config.output}"
 }
 ```
+
+## Use Case
+
+As a release engineer or platform operator, I would like to format terraform outputs to insert into other tools.
+
+```sh
+terraform init
+
+terraform apply
+
+terraform output director_config>director_config.yml
+
+om -k configure-director --config director_config.yml
+
+```
+
