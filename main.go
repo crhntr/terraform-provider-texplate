@@ -43,6 +43,10 @@ func resourceServer() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"vars": &schema.Schema{
+				Type:     schema.TypeMap,
+				Optional: true,
+			},
 			"output": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,

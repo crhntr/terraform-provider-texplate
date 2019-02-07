@@ -23,7 +23,7 @@ networks-configuration:
       gateway: {{.infrastructure_subnet_gateway}}
       iaas_identifier: {{.network_name}}/{{.infrastructure_subnet_name}}
       reserved_ip_ranges: {{cidrhost .infrastructure_subnet_cidr 0}}-{{cidrhost .infrastructure_subnet_cidr 5}}
-{{if index . "pas_subnet_cidr"}}
+{{- if index . "pas_subnet_cidr"}}
   - name: {{.pas_subnet_name}}
     subnets:
     - cidr: {{.pas_subnet_cidr}}
@@ -31,7 +31,7 @@ networks-configuration:
       gateway: {{.pas_subnet_gateway}}
       iaas_identifier: {{.network_name}}/{{.pas_subnet_name}}
       reserved_ip_ranges: {{cidrhost .pas_subnet_cidr 0}}-{{cidrhost .pas_subnet_cidr 5}}
-{{end}}
+{{end -}}
 {{if index . "pks_subnet_cidr"}}
   - name: {{.pks_subnet_name}}
     subnets:
@@ -40,7 +40,7 @@ networks-configuration:
       gateway: {{.pks_subnet_gateway}}
       iaas_identifier: {{.network_name}}/{{.pks_subnet_name}}
       reserved_ip_ranges: {{cidrhost .pks_subnet_cidr 0}}-{{cidrhost .pks_subnet_cidr 5}}
-{{end}}
+{{end -}}
 {{if index . "services_subnet_cidr"}}
   - name: {{.services_subnet_name}}
     subnets:
@@ -49,7 +49,7 @@ networks-configuration:
       gateway: {{.services_subnet_gateway}}
       iaas_identifier: {{.network_name}}/{{.services_subnet_name}}
       reserved_ip_ranges: {{cidrhost .services_subnet_cidr 0}}-{{cidrhost .services_subnet_cidr 5}}
-{{end}}
+{{end -}}
 {{if index . "control_plane_subnet_cidr"}}
   - name: {{.control_plane_subnet_name}}
     subnets:
@@ -58,7 +58,7 @@ networks-configuration:
       gateway: {{.control_plane_subnet_gateway}}
       iaas_identifier: {{.network_name}}/{{.control_plane_subnet_name}}
       reserved_ip_ranges: {{cidrhost .control_plane_subnet_cidr 0}}-{{cidrhost .control_plane_subnet_cidr 5}}
-{{end}}
+{{end -}}
 resource-configuration:
   compilation:
     instance_type:
