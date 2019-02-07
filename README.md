@@ -47,6 +47,13 @@ output "director_config" {
 }
 ```
 
+## Requesting Some Helper Function
+
+Given this is an early experiment, please send me any helper functions you would like included.
+
+Please PR a new `my_func.go` and `my_func_test.go` and include an example in the example.tf file using your function.
+See `main.go` for how to add the function to the defaultTemplate config.
+
 ## Use Case
 
 As a release engineer or platform operator, I would like to format terraform outputs to insert into other tools.
