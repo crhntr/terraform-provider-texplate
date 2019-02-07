@@ -11,12 +11,14 @@ import (
 // ************************************
 // Mocks
 
-//go:generate mockgen -source main.go -destination resource_data_mock_test.go -package main
+//go:generate mockgen -source main.go -destination texplate_mock_test.go -package main
 
 // ************************************
 // Unit Tests
 
 func TestExecute(t *testing.T) {
+	// TODO: mock out template and bufio
+
 	testGenerateID := func(_ string) string { return "some-hash" }
 
 	t.Run("when no variables are set", func(t *testing.T) {
@@ -26,8 +28,10 @@ func TestExecute(t *testing.T) {
 		defer mockCtrl.Finish()
 		dataResource := NewMockResourceData(mockCtrl)
 
+		var vars map[string]interface{}
+
 		dataResource.EXPECT().Get(mocking.Eq("template")).Return(template)
-		dataResource.EXPECT().GetOk(mocking.Eq("vars")).Return(nil, false)
+		dataResource.EXPECT().GetOk(mocking.Eq("vars")).Return(vars, false)
 		dataResource.EXPECT().Set(mocking.Eq("output"), mocking.Eq(template)).Return(nil)
 		dataResource.EXPECT().SetId(mocking.Eq("some-hash"))
 
@@ -39,7 +43,7 @@ func TestExecute(t *testing.T) {
 	})
 
 	t.Run("when template is invalid", func(t *testing.T) {
-		template := "Hello, world!"
+		template := " :{{ "
 
 		mockCtrl := mocking.NewController(t)
 		defer mockCtrl.Finish()
@@ -50,7 +54,71 @@ func TestExecute(t *testing.T) {
 
 		err := execute(dataResource, nil, testGenerateID, defaultTemplate())
 
-		if !gotExpectedErr(t, err, errors.New("invalid template")) {
+		if !gotExpectedErr(t, err, errors.New("template invalid: template: template:1: unexpected unclosed action in command")) {
+			t.Fail()
+		}
+	})
+
+	t.Run("when key does not exist in vars", func(t *testing.T) {
+		template := " {{ .does_not_exist }}"
+
+		mockCtrl := mocking.NewController(t)
+		defer mockCtrl.Finish()
+		dataResource := NewMockResourceData(mockCtrl)
+
+		var vars map[string]interface{}
+
+		dataResource.EXPECT().Get(mocking.Eq("template")).Return(template)
+		dataResource.EXPECT().GetOk(mocking.Eq("vars")).Return(vars, false)
+		// SetId, Get("vars"), and Set("output", output) should not be called
+
+		err := execute(dataResource, nil, testGenerateID, defaultTemplate())
+
+		if !gotExpectedErr(t, err, errors.New(`template execution error: template: template:1:4: executing "template" at <.does_not_exist>: map has no entry for key "does_not_exist"`)) {
+			t.Fail()
+		}
+	})
+
+	t.Run("when using a sprig func", func(t *testing.T) {
+		template := "{{ .value | indent 1}}"
+
+		mockCtrl := mocking.NewController(t)
+		defer mockCtrl.Finish()
+		dataResource := NewMockResourceData(mockCtrl)
+
+		vars := map[string]interface{}{"value": "value"}
+
+		dataResource.EXPECT().Get(mocking.Eq("template")).Return(template)
+		dataResource.EXPECT().GetOk(mocking.Eq("vars")).Return(vars, false)
+		dataResource.EXPECT().Set(mocking.Eq("output"), mocking.Eq(" value")).Return(nil)
+		dataResource.EXPECT().SetId(mocking.Eq("some-hash"))
+
+		// SetId, Get("vars"), and Set("output", output)should not be called
+		err := execute(dataResource, nil, testGenerateID, defaultTemplate())
+
+		if !gotExpectedErr(t, err, nil) {
+			t.Fail()
+		}
+	})
+
+	t.Run("when using a cidrhost", func(t *testing.T) {
+		template := `{{ cidrhost "10.0.0.0/16" 1 }}`
+
+		mockCtrl := mocking.NewController(t)
+		defer mockCtrl.Finish()
+		dataResource := NewMockResourceData(mockCtrl)
+
+		vars := map[string]interface{}{"value": "value"}
+
+		dataResource.EXPECT().Get(mocking.Eq("template")).Return(template)
+		dataResource.EXPECT().GetOk(mocking.Eq("vars")).Return(vars, false)
+		dataResource.EXPECT().Set(mocking.Eq("output"), mocking.Eq("10.0.0.1")).Return(nil)
+		dataResource.EXPECT().SetId(mocking.Eq("some-hash"))
+
+		// SetId, Get("vars"), and Set("output", output)should not be called
+		err := execute(dataResource, nil, testGenerateID, defaultTemplate())
+
+		if !gotExpectedErr(t, err, nil) {
 			t.Fail()
 		}
 	})
@@ -92,7 +160,29 @@ func TestExecute(t *testing.T) {
 }
 
 func TestCIDRHost(t *testing.T) {
-	t.SkipNow()
+	{
+		val, err := cidrhost("10.0.0.0/16", 5)
+		if err != nil {
+			t.Fail()
+		}
+		if val != "10.0.0.5" {
+			t.Fail()
+		}
+	}
+
+	{
+		_, err := cidrhost("bad cidr", 5)
+		if err == nil {
+			t.Error("it should return an error if the cidr is invalid")
+		}
+	}
+
+	{
+		_, err := cidrhost("10.0.0.0/32", 10000)
+		if err == nil {
+			t.Error("it should return an error if the host is out of cidr range")
+		}
+	}
 
 	type testdata struct {
 		Output, Template string

@@ -3,11 +3,13 @@ package main
 import (
 	"bytes"
 	"crypto/sha256"
+	"errors"
 	"fmt"
 	"html/template"
 	"io"
 	"net"
 
+	"github.com/Masterminds/sprig"
 	"github.com/apparentlymart/go-cidr/cidr"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/plugin"
@@ -56,22 +58,20 @@ type ResourceData interface {
 	SetId(string)
 }
 
-type Template interface {
-	New(name string) *template.Template
-	Parse(string) (*template.Template, error)
-	Execute(io.Writer, interface{}) error
-}
-
-func execute(data ResourceData, _ interface{}, generateID func(string) string, tmpl Template) error {
+func execute(data ResourceData, _ interface{}, generateID func(string) string, template *template.Template) error {
 	templateString := data.Get("template").(string)
+
+	var err error
+	template, err = template.Parse(templateString)
+	if err != nil {
+		return errors.New("template invalid: " + err.Error())
+	}
 	vars, _ := data.GetOk("vars")
 
-	t, _ := tmpl.Parse(templateString)
-	// if err != nil {
-	// 	return errors.New("invalid template")
-	// }
 	var buffer bytes.Buffer
-	t.Execute(&buffer, vars)
+	if err := template.Execute(&buffer, vars); err != nil {
+		return errors.New("template execution error: " + err.Error())
+	}
 
 	data.SetId(generateID(""))
 	data.Set("output", string(buffer.Bytes()))
@@ -80,9 +80,9 @@ func execute(data ResourceData, _ interface{}, generateID func(string) string, t
 
 func defaultTemplate() *template.Template {
 	tmpl := template.New("template")
-	// tmpl = tmpl.Option("missingkey=error")
-	// tmpl = tmpl.Funcs(sprig.FuncMap())
-	// tmpl = tmpl.Funcs(map[string]interface{}{"cidrhost": cidrhost})
+	tmpl = tmpl.Option("missingkey=error")
+	tmpl = tmpl.Funcs(sprig.FuncMap())
+	tmpl = tmpl.Funcs(map[string]interface{}{"cidrhost": cidrhost})
 	return tmpl
 }
 
