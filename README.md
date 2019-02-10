@@ -7,6 +7,7 @@ Inspired by [texplate](https://github.com/pivotal-cf/texplate).
 - [sprig](github.com/Masterminds/sprig)
 - [cidrhost](https://www.terraform.io/docs/configuration/interpolation.html#cidrhost-iprange-hostnum-)
 
+### Example
 *Example "director-config" yaml copied from [pivotal-cf/terraforming-azure](https://github.com/pivotal-cf/terraforming-azure).*
 
 ```hcl
