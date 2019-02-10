@@ -4,7 +4,7 @@ Go templates syntax in terraform.
 Inspired by [texplate](https://github.com/pivotal-cf/texplate).
 
 ### Included Template Helper Functions
-- [sprig](github.com/Masterminds/sprig)
+- [sprig](http://masterminds.github.io/sprig/)
 - [cidrhost](https://www.terraform.io/docs/configuration/interpolation.html#cidrhost-iprange-hostnum-)
 
 ### Example
