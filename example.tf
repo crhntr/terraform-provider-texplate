@@ -8,14 +8,14 @@ output "greeting" {
   value = "${data.texplate_execute.greeting.output}"
 }
 
-data "local_file" "director_config_template" {
-  filename = "${path.module}/testdata/configure-director.yml"
+data "local_file" "control_plane_config_template" {
+  filename = "${path.module}/testdata/configure-control-plane.yml"
 }
 
-data "texplate_execute" "director_config" {
-  template = "${data.local_file.director_config_template.content}"
+data "texplate_execute" "control_plane_config" {
+  template = "${data.local_file.control_plane_config_template.content}"
 
-  vars {
+  vars = {
     "subscription_id"               = "some-sub-id"
     "tenant_id"                     = "some-tenant-id"
     "client_id"                     = "some-client-id"
@@ -34,6 +34,6 @@ data "texplate_execute" "director_config" {
   }
 }
 
-output "director_config" {
-  value = "${data.texplate_execute.director_config.output}"
+output "control_plane_config" {
+  value = "${data.texplate_execute.control_plane_config.output}"
 }
