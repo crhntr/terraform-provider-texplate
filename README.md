@@ -1,5 +1,7 @@
 # terraform-provider-texplate
 
+**Please do not use this. It was a fun experiment. Consider Terraform's [template\_file](https://www.terraform.io/docs/providers/template/d/file.html) instead.**
+
 Go templates syntax in terraform.
 Inspired by [texplate](https://github.com/pivotal-cf/texplate).
 
